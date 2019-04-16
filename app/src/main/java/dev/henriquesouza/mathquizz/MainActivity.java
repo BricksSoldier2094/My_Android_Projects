@@ -15,8 +15,10 @@ public class MainActivity extends Activity {
 
     //Instancia o repositorio de questoes como uma variável global da classe
     private QuestaoRepositorio repositorio = new QuestaoRepositorio();
+
     //Setamos a variavel indice_questao como global e usaremos ela para dinamizar o indice do array de questoes
     private int indice_questao = 0;
+
     //Tornamos os Views globais dentro de nossa Activity de forma que ele possa ser acessado por todos os métodos
     private TextView textViewTextoQuestao;
     private Button botaoResposta1;
@@ -27,8 +29,12 @@ public class MainActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        //A questão recebe uma questão contida no repositório onde o índice é igual
+        //a variável dinamizada, índice.
         Questao questao = repositorio.getListaQuestoes().get(indice_questao);
 
+        //Acha o TextViewQuestão e seta sua propriedade text como sendo
+        //o texto da questão obtida do repositorio
         textViewTextoQuestao = findViewById(R.id.txtQuestao);
         textViewTextoQuestao.setText(questao.getTexto());
 
@@ -39,7 +45,7 @@ public class MainActivity extends Activity {
             public void onClick(View v) {
                 /*Casting necessário para tarnsformar a view num botão (view é a super classe
                 de todos os Views (elementos de tela)                */
-                final String resposta= ((Button)v).getText().toString();
+                final String resposta = ((Button)v).getText().toString();
 
                 AnalisadorQuestao analisadorQuestao = new AnalisadorQuestao();
                 Questao questao = repositorio.getListaQuestoes().get(indice_questao);
@@ -69,37 +75,40 @@ public class MainActivity extends Activity {
                 //Incrementa o indice
                 indice_questao++;
 
-                //Obtem a nova questão baseada no indice
-                Questao questao = repositorio.getListaQuestoes().get(indice_questao);
+                //Trata erro de IndexOutOfBounds Exception
+                if(indice_questao >= repositorio.getListaQuestoes().size()){
+                    indice_questao = 0;
+                }
 
-                //Seta os novaos valores aos Views
-                textViewTextoQuestao.setText(questao.getTexto());
-                botaoResposta1.setText(String.valueOf(questao.getRespostaCorreta()));
-                botaoResposta2.setText(String.valueOf(questao.getRespostaIncorreta()));
-
+                ExibirQuestao(indice_questao);
             }
         };
 
-
-        //Instancia o btnResposta1
+        //Instancia o btnResposta1, define propriedade text e seta o ClickListener
         botaoResposta1 = findViewById(R.id.btnResposta1);
-        //Seta a propriedade text como sendo o texto da questão
         botaoResposta1.setText(String.valueOf(questao.getRespostaCorreta()));
-        //Setando um ClickListener no botaoResposta1
         botaoResposta1.setOnClickListener(listener);
 
-        //Instancia o btnResposta2
+        //Instancia o btnResposta2, define propriedade text e seta o ClickListener
         botaoResposta2 = findViewById(R.id.btnResposta2);
-        //Seta a propriedade text como sendo o texto da questão
         botaoResposta2.setText(String.valueOf(questao.getRespostaIncorreta()));
-        //Setando um ClickListener no botaoResposta2
         botaoResposta2.setOnClickListener(listener);
 
-        //Instancia o botaoProximaPergunta
+        //Instancia o botaoProximaPergunta, define propriedade text e seta ClickListener ao botaoProximaPergunta
         Button botaoProximaPergunta = findViewById(R.id.btnProximaQuestao);
-        //Seta a propriedade text como sendo "proxima pergunta"
         botaoProximaPergunta.setText("Próxima Pergunta");
-        //Setando um ClickListener no botaoResposta2
         botaoProximaPergunta.setOnClickListener(listenerProximaQuestao);
+
+        ExibirQuestao(indice_questao);
+    }
+
+    public void ExibirQuestao(final int indice_questao){
+        //Obtem a nova questão baseada no indice
+        Questao questao = repositorio.getListaQuestoes().get(indice_questao);
+
+        //Seta os novaos valores aos Views
+        textViewTextoQuestao.setText(questao.getTexto());
+        botaoResposta1.setText(String.valueOf(questao.getRespostaCorreta()));
+        botaoResposta2.setText(String.valueOf(questao.getRespostaIncorreta()));
     }
 }
