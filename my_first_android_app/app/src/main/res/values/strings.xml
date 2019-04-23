@@ -1,4 +1,5 @@
 <resources>
     <string name="app_name">MathQuizz</string>
     <string name="proxima_pergunta_placeholder">Próxima Pergunta</string>
+    <string name="proximaquestao_placeholder">Próxima Questão</string>
 </resources>

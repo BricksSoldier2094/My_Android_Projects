@@ -7,19 +7,26 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.text.NumberFormat;
+import java.text.ParseException;
+import java.util.Locale;
+
 import dev.henriquesouza.mathquizz.Model.AnalisadorQuestao;
 import dev.henriquesouza.mathquizz.Model.Questao;
 import dev.henriquesouza.mathquizz.Model.QuestaoRepositorio;
 
 public class MainActivity extends Activity {
 
-    //Instancia o repositorio de questoes como uma variável global da classe
+    //Instancia o repositorio
     private QuestaoRepositorio repositorio = new QuestaoRepositorio();
 
-    //Setamos a variavel indice_questao como global e usaremos ela para dinamizar o indice do array de questoes
+    //Setamos a variavel indice_questao como global
     private int indice_questao = 0;
 
-    //Tornamos os Views globais dentro de nossa Activity de forma que ele possa ser acessado por todos os métodos
+    //Guarda informações de nossa localização / cultura
+    private final Locale locale = new Locale("pt", "BR");
+
+    //Tornamos os Views globais dentro de nossa Activity
     private TextView textViewTextoQuestao;
     private Button botaoResposta1;
     private Button botaoResposta2;
@@ -29,20 +36,17 @@ public class MainActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        //A questão recebe uma questão contida no repositório onde o índice é igual
-        //a variável dinamizada, índice.
+        //A questão recebe uma questão contida no repositório
         Questao questao = repositorio.getListaQuestoes().get(indice_questao);
 
-        //Acha o TextViewQuestão e seta sua propriedade text como sendo
-        //o texto da questão obtida do repositorio
-        textViewTextoQuestao = findViewById(R.id.txtQuestao);
-        textViewTextoQuestao.setText(questao.getTexto());
+        textViewTextoQuestao = findViewById(R.id.txtQuestao); //Instancia textView
+        textViewTextoQuestao.setText(questao.getTexto()); //Seta propriedade text como sendo a questão
 
         //View on click listener, carrega a lógica do click no botão.
         View.OnClickListener listener = new View.OnClickListener() {
 
-            @Override
             public void onClick(View v) {
+
                 /*Casting necessário para tarnsformar a view num botão (view é a super classe
                 de todos os Views (elementos de tela)                */
                 final String resposta = ((Button)v).getText().toString();
@@ -52,16 +56,22 @@ public class MainActivity extends Activity {
 
                 String Mensagem;
 
-                //Casting do parâmetro resposta para transforma-lo num Double.
-                if(analisadorQuestao.isRespostaCorreta(questao,Double.valueOf(resposta))){
+                try {
+                    //Formata nossa resposta para numero
+                    NumberFormat format = NumberFormat.getInstance(locale);
+                    Number number = format.parse(resposta);
 
-                    Mensagem = "Parabéns, resposta correta!";
+                    //Casting do parâmetro resposta para transforma-lo num Double.
+                    if (analisadorQuestao.isRespostaCorreta(questao, number.doubleValue())) {
 
-                }else
-                {
-                    Mensagem = "Aah, resposta errada :(";
+                        Mensagem = "Parabéns, resposta correta!";
+
+                    } else {
+                        Mensagem = "Aah, resposta errada :(";
+                    }
+                }catch(ParseException e){
+                    Mensagem = e.getMessage();
                 }
-
                 //Toast - notifica o usuário com a menssagem decorrente de sua escolha
                 Toast.makeText(MainActivity.this, Mensagem, Toast.LENGTH_SHORT).show();
             }
@@ -69,7 +79,7 @@ public class MainActivity extends Activity {
 
         //View OnLickListener para o botao proxima questao
         View.OnClickListener listenerProximaQuestao = new View.OnClickListener() {
-            @Override
+
             public void onClick(View view) {
 
                 //Incrementa o indice
@@ -84,19 +94,18 @@ public class MainActivity extends Activity {
             }
         };
 
-        //Instancia o btnResposta1, define propriedade text e seta o ClickListener
-        botaoResposta1 = findViewById(R.id.btnResposta1);
-        botaoResposta1.setText(String.valueOf(questao.getRespostaCorreta()));
-        botaoResposta1.setOnClickListener(listener);
 
-        //Instancia o btnResposta2, define propriedade text e seta o ClickListener
+        botaoResposta1 = findViewById(R.id.btnResposta1); //Instancia btnResposta1
+        botaoResposta1.setText(String.valueOf(questao.getRespostaCorreta())); // Define propriedade text
+        botaoResposta1.setOnClickListener(listener); // Seta ClickListener
+
+
         botaoResposta2 = findViewById(R.id.btnResposta2);
         botaoResposta2.setText(String.valueOf(questao.getRespostaIncorreta()));
         botaoResposta2.setOnClickListener(listener);
 
-        //Instancia o botaoProximaPergunta, define propriedade text e seta ClickListener ao botaoProximaPergunta
+
         Button botaoProximaPergunta = findViewById(R.id.btnProximaQuestao);
-        botaoProximaPergunta.setText("Próxima Pergunta");
         botaoProximaPergunta.setOnClickListener(listenerProximaQuestao);
 
         ExibirQuestao(indice_questao);
@@ -106,9 +115,13 @@ public class MainActivity extends Activity {
         //Obtem a nova questão baseada no indice
         Questao questao = repositorio.getListaQuestoes().get(indice_questao);
 
+        //Para formatar a exibição dos valores
+        String respostaCorreta = String.format(locale,"%.2f", questao.getRespostaCorreta());
+        String respostaIncorreta = String.format(locale,"%.2f", questao.getRespostaIncorreta());
+
         //Seta os novaos valores aos Views
         textViewTextoQuestao.setText(questao.getTexto());
-        botaoResposta1.setText(String.valueOf(questao.getRespostaCorreta()));
-        botaoResposta2.setText(String.valueOf(questao.getRespostaIncorreta()));
+        botaoResposta1.setText(respostaCorreta);
+        botaoResposta2.setText(respostaIncorreta);
     }
 }
