@@ -17,6 +17,7 @@ import dev.henriquesouza.mathquizz.Model.QuestaoRepositorio;
 
 public class MainActivity extends Activity {
 
+    public static final String INDICE_QUESTAO = "INDICE_QUESTAO";
     //Instancia o repositorio
     private QuestaoRepositorio repositorio = new QuestaoRepositorio();
 
@@ -108,7 +109,19 @@ public class MainActivity extends Activity {
         Button botaoProximaPergunta = findViewById(R.id.btnProximaQuestao);
         botaoProximaPergunta.setOnClickListener(listenerProximaQuestao);
 
+        if(savedInstanceState != null){
+            indice_questao = savedInstanceState.getInt(INDICE_QUESTAO);
+        }
+
         ExibirQuestao(indice_questao);
+    }
+
+    //Método usado para guardar o estado da aplicação (id da questao)
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+
+        outState.putInt(INDICE_QUESTAO, indice_questao);
     }
 
     public void ExibirQuestao(final int indice_questao){
